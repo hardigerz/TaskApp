@@ -36,6 +36,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    // ViewBinding
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -47,13 +51,16 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
 
 
     //Lifecyle viewmodel and livedata
     implementation(libs.lifecycleViewModel)
     implementation(libs.lifecycleLiveData)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Dagger
+    // Dagger hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
@@ -63,6 +70,9 @@ dependencies {
 
     // JSON serialization library, works with the Kotlin serialization plugin
     implementation(libs.kotlinx.serialization.json)
+
+    // RecyclerView
+    implementation(libs.androidx.recyclerview)
 
     // OkHttp
     implementation(platform(libs.okhttp.bom))
@@ -86,8 +96,11 @@ dependencies {
     // implementation(libs.mockito.core)
     implementation(libs.mockito.kotlin)
 
+    // Coroutine
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
-
+    //room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
