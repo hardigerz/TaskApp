@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TaskApp</string>
+
+    <string-array name="task_status">
+        <item>Pending</item>
+        <item>Completed</item>
+    </string-array>
 </resources>
