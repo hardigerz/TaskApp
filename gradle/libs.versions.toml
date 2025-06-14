@@ -1,11 +1,13 @@
 [versions]
 agp = "8.9.2"
+core = "1.5.0"
 coreTesting = "2.2.0"
+coreTestingVersion = "1.0.0"
 hiltAndroid = "2.56.1"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
+junitVersion = "1.1.5"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 kotlinxCoroutinesCore = "1.8.1"
@@ -26,10 +28,14 @@ lifecycle = "2.6.2"
 glide = "4.15.1"
 retrofit2KotlinxSerializationConverter = "1.0.0"
 roomRuntime = "2.7.1"
+roomTesting = "2.6.1"
+runner = "1.5.2"
 symbolProcessingApi = "2.0.21-1.0.28"
+truthVersion = "1.1.5"
 turbine = "1.1.0"
 
 [libraries]
+androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -40,6 +46,9 @@ androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+core-testing = { module = "android.arch.core:core-testing", version.ref = "coreTestingVersion" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -65,6 +74,7 @@ lifecycleLiveData = { module = "androidx.lifecycle:lifecycle-livedata-ktx", vers
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
+truth-v115 = { module = "com.google.truth:truth", version.ref = "truthVersion" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]

@@ -48,12 +48,20 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    androidTestImplementation(libs.androidx.room.testing)
+    // Instrumentation test runner
+    androidTestImplementation(libs.androidx.runner)
+    // AndroidJUnit4
+    androidTestImplementation(libs.androidx.junit)
+    // Espresso for UI testing
+    androidTestImplementation(libs.androidx.espresso.core)
+    // Truth (if you need assertions)
+    androidTestImplementation(libs.truth.v115)
+    testImplementation(libs.junit)
 
 
     //Lifecyle viewmodel and livedata
@@ -82,7 +90,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
 
     // Retrofit
-    implementation (libs.retrofit)
+    implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     testImplementation(libs.retrofit2.kotlinx.serialization.converter)
 
@@ -106,5 +114,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
 }

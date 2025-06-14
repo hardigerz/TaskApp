@@ -1,8 +1,6 @@
 package com.testhar.taskapp
 
-import androidx.lifecycle.viewModelScope
 import com.testhar.taskapp.domain.model.Task
-import com.testhar.taskapp.domain.repository.TaskRepository
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
 import com.testhar.taskapp.utils.FilterState
 import junit.framework.TestCase.assertEquals
@@ -19,12 +17,8 @@ import org.junit.Before
 import org.junit.Test
 import com.testhar.taskapp.domain.repository.FakeTaskRepository
 import com.testhar.taskapp.ui.viewmodel.TestableTaskViewModel
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,4 +95,87 @@ class TaskViewModelTest {
         assertEquals(2, result.size)
         assertTrue(result.all { it.isCompleted })
     }
+
+    @Test
+    fun `filteredTasks emits all tasks when filter is All`() = runTest(testDispatcher) {
+        // Arrange
+        val task1 = Task(id = 1, title = "Task 1", isCompleted = true)
+        val task2 = Task(id = 2, title = "Task 2", isCompleted = false)
+        val task3 = Task(id = 3, title = "Task 3", isCompleted = true)
+
+        repository.insertTask(task1)
+        repository.insertTask(task2)
+        repository.insertTask(task3)
+
+        val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
+
+        viewModel.setFilter(FilterState.All)
+        advanceUntilIdle()
+
+        // Assert
+        val result = viewModel.filteredTasks.value
+        println("✅ Emitted: $result")
+        assertEquals(3, result.size)
+        assertTrue(result.containsAll(listOf(task1, task2, task3)))
+    }
+
+
+    @Test
+    fun `filteredTasks emits only pending tasks when filter is Pending`() = runTest(testDispatcher) {
+        // Arrange
+        val task1 = Task(id = 1, title = "Done 1", isCompleted = true)
+        val task2 = Task(id = 2, title = "Pending 1", isCompleted = false)
+        val task3 = Task(id = 3, title = "Pending 2", isCompleted = false)
+
+        repository.insertTask(task1)
+        repository.insertTask(task2)
+        repository.insertTask(task3)
+
+        val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
+
+        viewModel.setFilter(FilterState.Pending)
+        advanceUntilIdle()
+
+        // Assert
+        val result = viewModel.filteredTasks.value
+        println("✅ Emitted: $result")
+        assertEquals(2, result.size)
+        assertTrue(result.all { !it.isCompleted })
+    }
+
+    @Test
+    fun `observeTasks emits inserted tasks`() = runTest(testDispatcher) {
+        // Arrange
+        val task1 = Task(id = 1, title = "One", isCompleted = false)
+        val task2 = Task(id = 2, title = "Two", isCompleted = true)
+
+        repository.insertTask(task1)
+        repository.insertTask(task2)
+
+        // Act
+        val emitted = repository.observeTasks().first()
+
+        // Assert
+        assertEquals(2, emitted.size)
+        assertTrue(emitted.containsAll(listOf(task1, task2)))
+    }
+
+    @Test
+    fun `getTaskById returns correct task`() = runTest(testDispatcher) {
+        // Arrange
+        val task1 = Task(id = 101, title = "Alpha", isCompleted = false)
+        val task2 = Task(id = 102, title = "Beta", isCompleted = true)
+        repository.insertTask(task1)
+        repository.insertTask(task2)
+
+        val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
+
+        // Act
+        val foundTask = viewModel.getTaskById(102)
+
+        // Assert
+        assertEquals("Beta", foundTask?.title)
+        assertEquals(true, foundTask?.isCompleted)
+    }
+
 }
