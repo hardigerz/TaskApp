@@ -16,66 +16,52 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(
-    private val repository: TaskRepository
+open class TaskViewModel @Inject constructor(
+    private val repository: TaskRepository,
 ) : ViewModel() {
 
-    // Holds current filter (All, Completed, Pending)
+    protected open val sharingStarted: SharingStarted = SharingStarted.WhileSubscribed(5000)
+
     private val _filter = MutableStateFlow(FilterState.All)
     val filter = _filter.asStateFlow()
 
-    // Main source of truth: observe from Room using Flow
-    private val allTasks: Flow<List<Task>> = repository
+    protected open val allTasks: Flow<List<Task>> = repository
         .observeTasks()
-        .distinctUntilChanged() // Avoid reprocessing same list
-        .onEach { Log.d("ViewModel", "📡 observed ${it.size} tasks from DB") }
+        .distinctUntilChanged()
 
-    // Combine tasks + filter to produce filtered output
-    val filteredTasks: StateFlow<List<Task>> = combine(allTasks, _filter) { tasks, filter ->
-        when (filter) {
-            FilterState.All -> tasks
-            FilterState.Completed -> tasks.filter { it.isCompleted }
-            FilterState.Pending -> tasks.filter { !it.isCompleted }
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        emptyList()
-    )
+    open val filteredTasks: StateFlow<List<Task>> by lazy {
+        combine(allTasks, _filter) { tasks, filter ->
+            when (filter) {
+                FilterState.All -> tasks
+                FilterState.Completed -> tasks.filter { it.isCompleted }
+                FilterState.Pending -> tasks.filter { !it.isCompleted }
+            }
+        }.stateIn(viewModelScope, sharingStarted, emptyList())
+    }
 
-
-    // Get single task by ID (used for editing)
+    //    // Get single task by ID (used for editing)
     suspend fun getTaskById(id: Int): Task? = repository.observeTasks()
         .first().find { it.id == id }
 
-    // insertTask
     fun addTask(title: String, description: String?, isCompleted: Boolean) {
         viewModelScope.launch {
-            repository.insertTask(Task(title = title, description = description,  isCompleted = isCompleted))
+            repository.insertTask(Task(title = title, description = description, isCompleted = isCompleted))
         }
     }
 
-    // update task
     fun updateTask(task: Task) {
-        viewModelScope.launch {
-            repository.updateTask(task)
-        }
+        viewModelScope.launch { repository.updateTask(task) }
     }
 
-    // delete task
     fun deleteTask(task: Task) {
-        viewModelScope.launch {
-            repository.deleteTask(task)
-        }
+        viewModelScope.launch { repository.deleteTask(task) }
     }
 
-    // filtering set
     fun setFilter(state: FilterState) {
         _filter.value = state
     }

@@ -27,6 +27,7 @@ glide = "4.15.1"
 retrofit2KotlinxSerializationConverter = "1.0.0"
 roomRuntime = "2.7.1"
 symbolProcessingApi = "2.0.21-1.0.28"
+turbine = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,7 @@ lifecycleLiveData = { module = "androidx.lifecycle:lifecycle-livedata-ktx", vers
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
