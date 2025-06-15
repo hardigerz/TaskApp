@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.testhar.taskapp.databinding.ActivityAddEditTaskBinding
 import com.testhar.taskapp.ui.common.hideKeyboard
 import com.testhar.taskapp.ui.common.showToast
