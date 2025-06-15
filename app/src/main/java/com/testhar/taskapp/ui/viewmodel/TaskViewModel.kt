@@ -1,7 +1,6 @@
 
 package com.testhar.taskapp.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testhar.taskapp.domain.model.Task

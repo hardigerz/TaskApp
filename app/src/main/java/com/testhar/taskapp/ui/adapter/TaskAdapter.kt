@@ -9,43 +9,48 @@ import com.testhar.taskapp.databinding.ItemTaskBinding
 import com.testhar.taskapp.domain.model.Task
 
 class TaskAdapter(
-    private val onDelete: (Task) -> Unit,
-    private val onToggle: (Task) -> Unit,
-    val onEdit: (Task) -> Unit
-) : ListAdapter<Task, TaskAdapter.TaskViewHolder>(DiffCallback()) {
+    private val onDeleteClick: (Task) -> Unit,
+    private val onItemClick: (Task) -> Unit,
+    private val onStatusToggle: (Task, Boolean) -> Unit
+) : ListAdapter<Task, TaskAdapter.TaskViewHolder>(TaskDiffCallback()) {
 
-    inner class TaskViewHolder(private val binding: ItemTaskBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(task: Task) {
-            binding.tvTitle.text = task.title
-            binding.tvDescription.text = task.description ?: ""
-            binding.checkbox.isChecked = task.isCompleted
-
-            binding.checkbox.setOnClickListener {
-                onToggle(task)
-            }
-
-            binding.btnDelete.setOnClickListener {
-                onDelete(task)
-            }
-            binding.root.setOnClickListener {
-                onEdit(task)
-            }
-        }
+    init {
+        setHasStableIds(true)
     }
 
+    inner class TaskViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemTaskBinding.inflate(inflater, parent, false)
+        val binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TaskViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val task = getItem(position)
+        holder.binding.apply {
+            tvTitle.text = task.title
+            tvDescription.text = task.description ?: ""
+            // Prevent checkbox flicker by disabling listener before setting checked state
+            checkbox.setOnCheckedChangeListener(null)
+            if (checkbox.isChecked != task.isCompleted) {
+                checkbox.isChecked = task.isCompleted
+            }
+
+            checkbox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked != task.isCompleted) {
+                    onStatusToggle(task, isChecked)
+                }
+            }
+
+            btnDelete.setOnClickListener { onDeleteClick(task) }
+            root.setOnClickListener { onItemClick(task) }
+        }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Task>() {
-        override fun areItemsTheSame(oldItem: Task, newItem: Task) = oldItem.id == newItem.id
-        override fun areContentsTheSame(oldItem: Task, newItem: Task) = oldItem == newItem
+    override fun getItemId(position: Int): Long = getItem(position).id.toLong()
+
+    class TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
+        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean = oldItem == newItem
     }
 }

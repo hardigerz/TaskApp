@@ -1,19 +1,23 @@
 package com.testhar.taskapp.ui.activity
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.testhar.taskapp.databinding.ActivityAddEditTaskBinding
 import com.testhar.taskapp.domain.model.Task
 import com.testhar.taskapp.ui.common.hideKeyboard
 import com.testhar.taskapp.ui.common.showSnackbar
+import com.testhar.taskapp.ui.common.showToast
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -29,7 +33,11 @@ class AddEditTaskActivity : AppCompatActivity() {
     private var editingTaskId: Int? = null
 
     // Current task being edited, null if adding
-    private var currentTask: Task? = null
+    private var isEditMode = false
+
+    companion object {
+        const val EXTRA_TASK_ID = "extra_task_id"
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,73 +46,77 @@ class AddEditTaskActivity : AppCompatActivity() {
         setContentView(contentRoot)
         applyPropertyInset()
 
-        // Setup Spinner with status options
-        setupStatusSpinner()
+        setupStatusDropdown()
 
-        // Check if editing an existing task (taskId passed via Intent)
         editingTaskId = intent.getIntExtra(EXTRA_TASK_ID, -1).takeIf { it != -1 }
-        editingTaskId?.let { loadTask(it) } // Load task into form if editing
 
-        binding.btnSave.setOnClickListener {
-            val title = binding.etTitle.text.toString()
-            val desc = binding.etDescription.text.toString()
-            val status = binding.spinnerStatus.selectedItem.toString()
+        // If we have an ID, load that task
+        editingTaskId?.let { loadTaskData(it) }
 
-            if (title.isBlank()) {
-                binding.etTitle.error = "Title required"
-                return@setOnClickListener
-            }
-            // Determine if status is "Completed"
-            val isCompleted = status == "Completed"
-//            viewModel.addTask(title, if (desc.isBlank()) null else desc, isCompleted)
-//            finish()
+        binding.btnSave.setOnClickListener { saveTask() }
 
-            // If editing, update the existing task
-            if (currentTask != null) {
-                viewModel.updateTask(currentTask!!.copy(
-                    title = title,
-                    description = if (desc.isBlank()) null else desc,
-                    isCompleted = isCompleted
-                ))
-                showSnackbar(binding.root, "Task updated successfully ✅")
-            } else {
-                // Otherwise, insert a new task
-                viewModel.addTask(title, if (desc.isBlank()) null else desc, isCompleted)
-                showSnackbar(binding.root, "Task updated successfully ✅")
-            }
-
-            // Close the screen
-            hideKeyboard()
-            Handler(Looper.getMainLooper()).postDelayed({
-                finish()
-            }, 600)
-        }
+        // optional fade animation
+        window.enterTransition = android.transition.Fade()
+        window.exitTransition = android.transition.Fade()
     }
 
-    // Initialize Spinner with simple string list
-    private fun setupStatusSpinner() {
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            listOf("Pending", "Completed")
+    /* ---------------- dropdown ---------------- */
+
+    private fun setupStatusDropdown() {
+        val opts = listOf("Pending", "Completed")
+        binding.autoCompleteStatus.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, opts)
         )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerStatus.adapter = adapter
+        binding.autoCompleteStatus.setText("Pending", false)
     }
 
-    // If editing, load task by ID and pre-fill the fields
-    private fun loadTask(taskId: Int) {
+    /* ---------------- load / save ---------------- */
+
+    private fun loadTaskData(id: Int) {
         lifecycleScope.launch {
-            viewModel.getTaskById(taskId)?.let { task ->
-                currentTask = task
+            viewModel.getTaskById(id)?.let { task ->
                 binding.etTitle.setText(task.title)
-                binding.etDescription.setText(task.description)
-                val statusIndex = if (task.isCompleted) 1 else 0
-                binding.spinnerStatus.setSelection(statusIndex)
+                binding.etDescription.setText(task.description ?: "")
+                binding.autoCompleteStatus.setText(
+                    if (task.isCompleted) "Completed" else "Pending",
+                    false
+                )
             }
         }
     }
 
+    private fun saveTask() {
+        val title = binding.etTitle.text.toString().trim()
+        val description = binding.etDescription.text.toString().trim()
+        val isCompleted = binding.autoCompleteStatus.text.toString() == "Completed"
+
+        if (title.isBlank()) {
+            binding.etTitle.error = "Title required"
+            return
+        }
+
+        if (editingTaskId == null) {
+            // ➕ Add
+            viewModel.addTask(title, description, isCompleted)
+            showToast(this, "Task added ✅")
+        } else {
+            // ✏️ Update
+            lifecycleScope.launch {
+                viewModel.getTaskById(editingTaskId!!)?.let { old ->
+                    viewModel.updateTask(
+                        old.copy(
+                            title = title,
+                            description = description,
+                            isCompleted = isCompleted
+                        )
+                    )
+                    showToast(context = applicationContext, "Task updated ✅")
+                }
+            }
+        }
+        hideKeyboard()
+        finishAfterTransition()
+    }
 
     private fun applyPropertyInset() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -112,9 +124,5 @@ class AddEditTaskActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-    }
-
-    companion object {
-        const val EXTRA_TASK_ID = "task_id" // used in intent to pass taskId
     }
 }
