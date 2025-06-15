@@ -10,10 +10,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.SimpleItemAnimator
-import com.google.android.material.snackbar.Snackbar
 import com.testhar.taskapp.databinding.ActivityMainBinding
 import com.testhar.taskapp.ui.activity.AddEditTaskActivity
 import com.testhar.taskapp.ui.activity.AddEditTaskActivity.Companion.EXTRA_TASK_ID

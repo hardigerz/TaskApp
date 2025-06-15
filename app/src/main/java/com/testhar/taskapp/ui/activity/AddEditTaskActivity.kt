@@ -1,22 +1,15 @@
 package com.testhar.taskapp.ui.activity
 
-import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.testhar.taskapp.databinding.ActivityAddEditTaskBinding
-import com.testhar.taskapp.domain.model.Task
 import com.testhar.taskapp.ui.common.hideKeyboard
-import com.testhar.taskapp.ui.common.showSnackbar
 import com.testhar.taskapp.ui.common.showToast
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
