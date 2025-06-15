@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.testhar.taskapp.databinding.ActivityAddEditTaskBinding
 import com.testhar.taskapp.ui.common.hideKeyboard
 import com.testhar.taskapp.ui.common.showToast
@@ -30,11 +31,18 @@ class AddEditTaskActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply fade before super.onCreate
+        window.enterTransition = android.transition.Fade().apply {
+            duration = 200 // Optional: customize speed
+        }
+        window.returnTransition = null  // No return animation
+        window.exitTransition = null    // No exit animation
+        window.reenterTransition = null // No reenter animation
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(contentRoot)
         applyPropertyInset()
-
         setupStatusDropdown()
 
         editingTaskId = intent.getIntExtra(EXTRA_TASK_ID, -1).takeIf { it != -1 }
@@ -44,10 +52,11 @@ class AddEditTaskActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveTask() }
 
-        // optional fade animation
-        window.enterTransition = android.transition.Fade()
-        window.exitTransition = android.transition.Fade()
+
+
+
     }
+
 
     /* ---------------- dropdown ---------------- */
 
@@ -85,11 +94,11 @@ class AddEditTaskActivity : AppCompatActivity() {
         }
 
         if (editingTaskId == null) {
-            // ➕ Add
+            // Add
             viewModel.addTask(title, description, isCompleted)
             showToast(this, "Task added ✅")
         } else {
-            // ✏️ Update
+            // Update
             lifecycleScope.launch {
                 viewModel.getTaskById(editingTaskId!!)?.let { old ->
                     viewModel.updateTask(

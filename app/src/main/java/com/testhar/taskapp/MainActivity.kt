@@ -48,9 +48,7 @@ class MainActivity : AppCompatActivity() {
         setupChips()
         setupObservers()
         binding.btnAdd.setOnClickListener {
-            val intent = Intent(this, AddEditTaskActivity::class.java)
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-            startActivity(intent, options.toBundle())
+            startActivity(Intent(this, AddEditTaskActivity::class.java))
         }
     }
 
@@ -65,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                         binding.recyclerView.scrollToPosition(scrollPositionToRestore)
                     }
                     lastFilter = taskViewModel.filter.value
+
                 }
                 val isEmpty = tasks.isEmpty()
                 binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
@@ -98,8 +97,7 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, AddEditTaskActivity::class.java).apply {
                     putExtra(EXTRA_TASK_ID, task.id)
                 }
-                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-                startActivity(intent, options.toBundle())
+               startActivity(intent)
             },
             onStatusToggle = { task, isChecked ->
                 taskViewModel.updateTask(task.copy(isCompleted = isChecked))
