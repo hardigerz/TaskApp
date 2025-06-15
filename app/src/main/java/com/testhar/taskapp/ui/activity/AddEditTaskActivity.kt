@@ -25,13 +25,9 @@ class AddEditTaskActivity : AppCompatActivity() {
     // Task ID passed via Intent for editing (null if adding)
     private var editingTaskId: Int? = null
 
-    // Current task being edited, null if adding
-    private var isEditMode = false
-
     companion object {
         const val EXTRA_TASK_ID = "extra_task_id"
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -18,6 +18,7 @@ import com.testhar.taskapp.ui.adapter.TaskAdapter
 import com.testhar.taskapp.ui.common.showConfirmDialog
 import com.testhar.taskapp.ui.common.showSnackbar
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
+import com.testhar.taskapp.utils.Constants.KEY_SCROLL_POSITION
 import com.testhar.taskapp.utils.FilterState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -30,11 +31,18 @@ class MainActivity : AppCompatActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
     private lateinit var adapter: TaskAdapter
 
+    private var lastFilter: FilterState = FilterState.All
+    private var scrollPositionToRestore: Int = 0
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(contentRoot)
+
+        scrollPositionToRestore = savedInstanceState?.getInt(KEY_SCROLL_POSITION) ?: 0
         applyPropertyInset()
         setupAdapter()
         setupChips()
@@ -49,7 +57,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         lifecycleScope.launch {
             taskViewModel.filteredTasks.collectLatest { tasks ->
-                adapter.submitList(tasks.toList())
+                adapter.submitList(tasks.toList()) {
+                    val isFilterChanged = lastFilter != taskViewModel.filter.value
+                    if (isFilterChanged) {
+                        binding.recyclerView.smoothScrollToPosition(0)
+                    } else {
+                        binding.recyclerView.scrollToPosition(scrollPositionToRestore)
+                    }
+                    lastFilter = taskViewModel.filter.value
+                }
                 val isEmpty = tasks.isEmpty()
                 binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
 
@@ -127,6 +143,13 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val layoutManager = binding.recyclerView.layoutManager as? LinearLayoutManager
+        val firstVisible = layoutManager?.findFirstVisibleItemPosition() ?: 0
+        outState.putInt(KEY_SCROLL_POSITION, firstVisible)
     }
 
 
