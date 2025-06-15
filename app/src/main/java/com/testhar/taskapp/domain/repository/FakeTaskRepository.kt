@@ -28,9 +28,7 @@ class FakeTaskRepository : TaskRepository {
     }
 
     override suspend fun deleteTask(task: Task) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            taskList.removeIf { it.id == task.id }
-        }
+        taskList.removeAll { it.id == task.id }
         taskFlow.value = taskList.toList()
     }
 

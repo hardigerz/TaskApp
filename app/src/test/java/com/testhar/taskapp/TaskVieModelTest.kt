@@ -2,7 +2,6 @@ package com.testhar.taskapp
 
 import com.testhar.taskapp.domain.model.Task
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
-import com.testhar.taskapp.utils.FilterState
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,22 +16,35 @@ import org.junit.Before
 import org.junit.Test
 import com.testhar.taskapp.domain.repository.FakeTaskRepository
 import com.testhar.taskapp.ui.viewmodel.TestableTaskViewModel
+import com.testhar.taskapp.utils.TaskStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskViewModelTest {
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private lateinit var viewModel: TaskViewModel
     private lateinit var repository: FakeTaskRepository
     private val testDispatcher = StandardTestDispatcher()
+
+
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeTaskRepository()
         viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
+        // default filter = ALL, but let's be explicit:
+        viewModel.setFilter(TaskStatus.All)
     }
 
     @After
@@ -64,16 +76,29 @@ class TaskViewModelTest {
         assertEquals("Updated", tasks[0].title)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `deleteTask should remove task`() = runTest(testDispatcher) {
+    fun `deleteTask should remove task`() = runTest {
+        // 1Bind Main to this test's scheduler
+        val mainDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(mainDispatcher)
+
+        viewModel = TaskViewModel(repository)
+        viewModel.setFilter(TaskStatus.All)
+
+        //Insert and then delete
         val task = Task(id = 1, title = "To Delete", description = null, isCompleted = false)
         repository.insertTask(task)
-
         viewModel.deleteTask(task)
+
+        // Advance until everything queued on the test scheduler runs
         advanceUntilIdle()
 
-        val tasks = repository.getTasks()
-        assertTrue(tasks.isEmpty())
+        // Assert the in-memory repo is empty
+        assertTrue(repository.getTasks().isEmpty())
+
+        // Clean up
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -85,7 +110,7 @@ class TaskViewModelTest {
 
         val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
 
-        viewModel.setFilter(FilterState.Completed)
+        viewModel.setFilter(TaskStatus.Completed)
         advanceUntilIdle()
 
         val result = viewModel.filteredTasks.value
@@ -109,7 +134,7 @@ class TaskViewModelTest {
 
         val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
 
-        viewModel.setFilter(FilterState.All)
+        viewModel.setFilter(TaskStatus.All)
         advanceUntilIdle()
 
         // Assert
@@ -133,7 +158,7 @@ class TaskViewModelTest {
 
         val viewModel = TestableTaskViewModel(repository, SharingStarted.Eagerly)
 
-        viewModel.setFilter(FilterState.Pending)
+        viewModel.setFilter(TaskStatus.Pending)
         advanceUntilIdle()
 
         // Assert
@@ -178,4 +203,15 @@ class TaskViewModelTest {
         assertEquals(true, foundTask?.isCompleted)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    class MainDispatcherRule(
+        val dispatcher: TestDispatcher = UnconfinedTestDispatcher()
+    ) : TestWatcher() {
+        override fun starting(description: Description) {
+            Dispatchers.setMain(dispatcher)
+        }
+        override fun finished(description: Description) {
+            Dispatchers.resetMain()
+        }
+    }
 }
