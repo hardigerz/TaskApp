@@ -78,6 +78,23 @@ TaskApp lets users:
 
 ---
 
+## 🚀 Running the Workflow Manually
+You can trigger the workflow manually from the GitHub Actions tab:
+
+- **Go to your repository.**
+- **Click on the Actions tab.**
+- **Select the latest workflow run.**
+- **Download the generated APK & AAB files from the artifacts section.**
+
+## 📂 Output Files
+
+After a successful build, you'll find the APK & AAB files in:
+```bash
+app/build/outputs/apk/debug/  (Debug APK)
+app/build/outputs/apk/release/ (Release APK)
+app/build/outputs/bundle/release/ (AAB File)
+```
+
 📂 Project Structure
 ```bash
 app/
@@ -91,6 +108,7 @@ app/
  │    └─ common/          # Extensions, dialogs/snackbar helpers
  ├─ src/test/             # Unit tests (ViewModel, fake repo)
  └─ src/androidTest/      # Instrumentation tests (Room, UI)
+```
 
 
 
