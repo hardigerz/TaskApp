@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testhar.taskapp.domain.model.Task
 import com.testhar.taskapp.domain.repository.TaskRepository
-import com.testhar.taskapp.utils.FilterState
+import com.testhar.taskapp.utils.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ open class TaskViewModel @Inject constructor(
 
     protected open val sharingStarted: SharingStarted = SharingStarted.WhileSubscribed(5000)
 
-    private val _filter = MutableStateFlow(FilterState.All)
+    private val _filter = MutableStateFlow(TaskStatus.All)
     val filter = _filter.asStateFlow()
 
     protected open val allTasks: Flow<List<Task>> = repository
@@ -36,9 +36,9 @@ open class TaskViewModel @Inject constructor(
     open val filteredTasks: StateFlow<List<Task>> by lazy {
         combine(allTasks, _filter) { tasks, filter ->
             when (filter) {
-                FilterState.All -> tasks
-                FilterState.Completed -> tasks.filter { it.isCompleted }
-                FilterState.Pending -> tasks.filter { !it.isCompleted }
+                TaskStatus.All -> tasks
+                TaskStatus.Completed -> tasks.filter { it.isCompleted }
+                TaskStatus.Pending -> tasks.filter { !it.isCompleted }
             }
         }.stateIn(viewModelScope, sharingStarted, emptyList())
     }
@@ -61,7 +61,7 @@ open class TaskViewModel @Inject constructor(
         viewModelScope.launch { repository.deleteTask(task) }
     }
 
-    fun setFilter(state: FilterState) {
+    fun setFilter(state: TaskStatus) {
         _filter.value = state
     }
 }

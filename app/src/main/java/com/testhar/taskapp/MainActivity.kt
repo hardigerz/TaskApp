@@ -18,7 +18,7 @@ import com.testhar.taskapp.ui.common.showConfirmDialog
 import com.testhar.taskapp.ui.common.showSnackbar
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
 import com.testhar.taskapp.utils.Constants.KEY_SCROLL_POSITION
-import com.testhar.taskapp.utils.FilterState
+import com.testhar.taskapp.utils.TaskStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
     private lateinit var adapter: TaskAdapter
 
-    private var lastFilter: FilterState = FilterState.All
+    private var lastFilter: TaskStatus = TaskStatus.All
     private var scrollPositionToRestore: Int = 0
 
 
@@ -70,9 +70,9 @@ class MainActivity : AppCompatActivity() {
                 if (isEmpty) {
                     val filterState = taskViewModel.filter.value
                     val messageRes = when (filterState) {
-                        FilterState.All -> R.string.no_tasks
-                        FilterState.Completed -> R.string.no_completed_tasks
-                        FilterState.Pending -> R.string.no_pending_tasks
+                        TaskStatus.All -> R.string.no_tasks
+                        TaskStatus.Completed -> R.string.no_completed_tasks
+                        TaskStatus.Pending -> R.string.no_pending_tasks
                     }
                     binding.emptyView.text = getString(messageRes)
                 }
@@ -85,11 +85,11 @@ class MainActivity : AppCompatActivity() {
             onDeleteClick = { task ->
                 showConfirmDialog(
                     context = this,
-                    title = "Delete Task",
-                    message = "Are you sure want to delete this task"
+                    title = getString(R.string.title_delete_task),
+                    message = getString(R.string.title_message_delete)
                 ) {
                     taskViewModel.deleteTask(task)
-                    showSnackbar(binding.root, "Task Deleted")
+                    showSnackbar(binding.root, getString(R.string.task_delete))
                 }
             },
             onItemClick = { task ->
@@ -114,22 +114,22 @@ class MainActivity : AppCompatActivity() {
     private fun setupChips() {
         // Apply chip selection from ViewModel state
         when (taskViewModel.filter.value) {
-            FilterState.All -> binding.chipGroup.check(binding.chipAll.id)
-            FilterState.Completed -> binding.chipGroup.check(binding.chipCompleted.id)
-            FilterState.Pending -> binding.chipGroup.check(binding.chipPending.id)
+            TaskStatus.All -> binding.chipGroup.check(binding.chipAll.id)
+            TaskStatus.Completed -> binding.chipGroup.check(binding.chipCompleted.id)
+            TaskStatus.Pending -> binding.chipGroup.check(binding.chipPending.id)
         }
 
         binding.chipAll.setOnClickListener {
-            if (taskViewModel.filter.value != FilterState.All)
-                taskViewModel.setFilter(FilterState.All)
+            if (taskViewModel.filter.value != TaskStatus.All)
+                taskViewModel.setFilter(TaskStatus.All)
         }
         binding.chipCompleted.setOnClickListener {
-            if (taskViewModel.filter.value != FilterState.Completed)
-                taskViewModel.setFilter(FilterState.Completed)
+            if (taskViewModel.filter.value != TaskStatus.Completed)
+                taskViewModel.setFilter(TaskStatus.Completed)
         }
         binding.chipPending.setOnClickListener {
-            if (taskViewModel.filter.value != FilterState.Pending)
-                taskViewModel.setFilter(FilterState.Pending)
+            if (taskViewModel.filter.value != TaskStatus.Pending)
+                taskViewModel.setFilter(TaskStatus.Pending)
         }
     }
 

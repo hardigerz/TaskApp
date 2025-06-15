@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TaskApp</string>
+    <string name="no_tasks">Tidak ada task yang ditampilkan</string>
+    <string name="no_completed_tasks">Tidak ditemukan pekerjaan selesai</string>
+    <string name="no_pending_tasks">Tidak ditemukan pekerjaan tertunda</string>
+
+    <!-- Hints -->
+    <string name="hint_title">Judul</string>
+    <string name="hint_description">Deskripsi</string>
+    <string name="hint_status">Status</string>
+
+    <!-- Status Dropdown -->
+    <string name="status_pending">Tertunda</string>
+    <string name="status_completed">Selesai</string>
+    <string name="status_all">Semua</string>
+
+    <!-- Button -->
+    <string name="btn_save">Simpan</string>
+    <string name="btn_add_task">Tambah Pekerjaan</string>
+    <string name="btn_delete">Hapus</string>
+
+    <!-- Toast Messages -->
+    <string name="task_added">Pekerjaan Ditambahkan ✅</string>
+    <string name="task_updated">Pekerjaan Diupdate ✅</string>
+    <string name="task_delete">Pekerjaan Dihapus ✅</string>
+
+    <!-- Error -->
+    <string name="error_title_required">Title tidak boleh kosong</string>
+    <string name="title_delete_task">Hapus Pekerjaan</string>
+    <string name="title_message_delete">Apalah Kamu Yakin Ingin Hapus Pekerjaan Ini?</string>
+</resources>

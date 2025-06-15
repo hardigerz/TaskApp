@@ -1,5 +1,6 @@
 package com.testhar.taskapp.ui.activity
 
+import com.testhar.taskapp.R
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +13,7 @@ import com.testhar.taskapp.databinding.ActivityAddEditTaskBinding
 import com.testhar.taskapp.ui.common.hideKeyboard
 import com.testhar.taskapp.ui.common.showToast
 import com.testhar.taskapp.ui.viewmodel.TaskViewModel
+import com.testhar.taskapp.utils.TaskStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -51,20 +53,18 @@ class AddEditTaskActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveTask() }
 
-
-
-
     }
 
 
     /* ---------------- dropdown ---------------- */
 
     private fun setupStatusDropdown() {
-        val opts = listOf("Pending", "Completed")
+        val statuses = TaskStatus.entries
+        val statusStrings = statuses.map { getString(it.stringResId) }
         binding.autoCompleteStatus.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, opts)
+            ArrayAdapter(this, com.google.android.material.R.layout.support_simple_spinner_dropdown_item, statusStrings)
         )
-        binding.autoCompleteStatus.setText("Pending", false)
+        binding.autoCompleteStatus.setText(getString(TaskStatus.Pending.stringResId), false)
     }
 
     /* ---------------- load / save ---------------- */
@@ -75,8 +75,7 @@ class AddEditTaskActivity : AppCompatActivity() {
                 binding.etTitle.setText(task.title)
                 binding.etDescription.setText(task.description ?: "")
                 binding.autoCompleteStatus.setText(
-                    if (task.isCompleted) "Completed" else "Pending",
-                    false
+                    getString(TaskStatus.fromCompleted(task.isCompleted).stringResId), false
                 )
             }
         }
@@ -85,17 +84,19 @@ class AddEditTaskActivity : AppCompatActivity() {
     private fun saveTask() {
         val title = binding.etTitle.text.toString().trim()
         val description = binding.etDescription.text.toString().trim()
-        val isCompleted = binding.autoCompleteStatus.text.toString() == "Completed"
+        val selectedStatus = TaskStatus.fromLocalizedName(this, binding.autoCompleteStatus.text.toString())
+        val isCompleted = selectedStatus.isCompleted
+
 
         if (title.isBlank()) {
-            binding.etTitle.error = "Title required"
+            binding.etTitle.error = getString(R.string.error_title_required)
             return
         }
 
         if (editingTaskId == null) {
             // Add
             viewModel.addTask(title, description, isCompleted)
-            showToast(this, "Task added ✅")
+            showToast(this, getString(R.string.task_added))
         } else {
             // Update
             lifecycleScope.launch {
@@ -107,7 +108,7 @@ class AddEditTaskActivity : AppCompatActivity() {
                             isCompleted = isCompleted
                         )
                     )
-                    showToast(context = applicationContext, "Task updated ✅")
+                    showToast(context = applicationContext, getString(R.string.task_updated))
                 }
             }
         }
