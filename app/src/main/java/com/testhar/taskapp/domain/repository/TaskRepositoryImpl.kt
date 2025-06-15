@@ -1,7 +1,6 @@
 
 package com.testhar.taskapp.domain.repository
 
-import android.util.Log
 import com.testhar.taskapp.data.dbclient.TaskEntity
 import com.testhar.taskapp.data.dbclient.dao.TaskDao
 import com.testhar.taskapp.domain.model.Task
